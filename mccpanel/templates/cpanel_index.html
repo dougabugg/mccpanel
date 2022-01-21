@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Control Panel Index{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <h2>Server List</h2>
+    <ul>
+        {% for server in servers %}
+        <li>
+            <a href="{{ url_for('cpanel.view_server', name=server.name) }}">{{ server.name }}</a>
+            {% set pid = server.pid %}
+            {% if pid != None %}
+                [online: {{ pid }}]
+            {% else %}
+                [offline]
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Server '{{ server.name }}'{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <!-- <button id="status">Status</button>
+    <code id="status_out"></code> -->
+</div>
+<div>
+    <div>Server Output</div>
+    <textarea id="output" cols="120" rows="30" readonly></textarea>
+</div>
+<div>
+    <button id="send_command">Send Command</button>
+    <input type="text" id="command_input" placeholder="command to send" style="width:500px;">
+</div>
+<script>
+    let last_ts = 0;
+    let server_output = document.querySelector("#output");
+    server_output.value = "";
+    function load_stdout() {
+        let req = new XMLHttpRequest();
+        req.addEventListener("load", function() {
+            let scroll_to_bottom = server_output.scrollTop == server_output.scrollTopMax;
+            let res = JSON.parse(req.responseText);
+            server_output.value += res.lines.join('');
+            last_ts = res.last_ts;
+            if(scroll_to_bottom)
+                server_output.scrollTop = server_output.scrollTopMax;
+        });
+        req.open("GET", "output/" + last_ts);
+        req.send();
+    }
+    load_stdout();
+    let load_interval = null;
+    function disable_polling() {
+        if(load_interval != null)
+            clearInterval(load_interval);
+        load_interval = null;
+        server_output.disabled = true;
+    }
+    function enable_polling() {
+        if(load_interval != null)
+            return;
+        disable_polling();
+        load_interval = setInterval(load_stdout, 1000);
+        server_output.disabled = false;
+    }
+    window.addEventListener("blur", disable_polling);
+    window.addEventListener("focus", enable_polling);
+    enable_polling();
+
+    let command_input = document.querySelector("#command_input");
+    let send_command_button = document.querySelector("#send_command");
+    function send_command() {
+        if(command_input.value == "")
+            return;
+        let req = new XMLHttpRequest();
+        req.open("GET", "input/" + encodeURIComponent(command_input.value));
+        req.send();
+        command_input.value = "";
+    }
+    send_command_button.addEventListener("click", send_command)
+    command_input.addEventListener("keypress", function(e) {
+        if(e.key == "Enter")
+            send_command();
+    });
+
+    let start_button = document.querySelector("#start");
+    let stop_button = document.querySelector("#stop");
+    // let status_button = document.querySelector("#status");
+    // let status_output = document.querySelector("#status_out");
+    start_button.addEventListener("click", function() {
+        let req = new XMLHttpRequest();
+        req.addEventListener("load", function() {
+            // status_output.textContent = req.responseText;
+        });
+        req.open("GET", "start");
+        req.send();
+    });
+    stop_button.addEventListener("click", function() {
+        let req = new XMLHttpRequest();
+        req.addEventListener("load", function() {
+            // status_button.click();
+        });
+        req.open("GET", "input/stop");
+        req.send();
+    });
+    // status_button.addEventListener("click", function() {
+    //     let req = new XMLHttpRequest();
+    //     req.addEventListener("load", function() {
+    //         status_output.textContent = req.responseText;
+    //     });
+    //     req.open("GET", "/status");
+    //     req.send();
+    // });
+</script>
+{% endblock %}
