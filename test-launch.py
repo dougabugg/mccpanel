@@ -1,4 +1,4 @@
 import os, subprocess
 os.environ["FLASK_APP"] = "mccpanel"
-# os.spawnvp("python", ("-m", "flask", "run"))
+os.environ["MCCPANEL_CONFIG"] = "test_config.json"
 subprocess.run(["python", "-m", "flask", "run"])

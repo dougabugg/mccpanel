@@ -1,0 +1,13 @@
+{
+    "registed_users": [
+        {"username": "bunnmom", "passtoken": "cookie"}
+    ],
+    "servers": [
+        {
+            "name": "main",
+            "jar_file": "paper-1.18.1-164.jar",
+            "cwd": "./servers/paper-server-01",
+            "autostart": true
+        }
+    ]
+}
